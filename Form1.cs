@@ -538,11 +538,11 @@ namespace OSM_Geocoding
                 for (int i = 2; i <= rowCount; i++)
                 {
                     bool outOfRange = i > rowCount2;
-                    if (arrData[i, 11] != null && arrData[i, 11] != null)
+                    if (arrData[i, 15] != null && arrData[i, 16] != null)
                     {
                         AddressListElement aAddressListElement = new AddressListElement();
                         aAddressListElement.row = i;
-                        var ss = getStringFromXML(arrData[i, 15]);
+                        //var ss = getStringFromXML(arrData[i, 15]);
                         aAddressListElement.latid = getStringFromXML(arrData[i, 15]).Replace(',', '.');
                         aAddressListElement.longit = getStringFromXML(arrData[i, 16]).Replace(',', '.');                        
                         aAddressListElement.M = getStringFromXML(arrData[i, 13]) == "" ? "АС" : getStringFromXML(arrData[i, 13]);
@@ -653,7 +653,7 @@ namespace OSM_Geocoding
                     arr[i, 13] = "фасад-кирпич";
                     arr[i, 14] = aRow.L;
                     arr[i, 15] = "ПВ";
-                    arr[i, 16] = aRow.L.IndexOf('(', 1) != -1 ? aRow.L.Substring(aRow.L.IndexOf('(')+1, 1) : "";
+                    arr[i, 16] = aRow.L.IndexOf('(') != -1 ? aRow.L.Substring(aRow.L.IndexOf('(')+1, 1) : "";
                     arr[i, 17] = aRow.latid;
                     arr[i, 18] = aRow.longit;
 

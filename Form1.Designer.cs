@@ -64,6 +64,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.radioButtonOSM = new System.Windows.Forms.RadioButton();
             this.radioButtonYa = new System.Windows.Forms.RadioButton();
+            this.useYandexCityCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.proxyListElementBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
@@ -264,10 +265,10 @@
             this.comleteDataGridViewCheckBoxColumn});
             this.dataGridView3.DataSource = this.resultInfoElementBindingSource;
             this.dataGridView3.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.dataGridView3.Location = new System.Drawing.Point(0, 227);
+            this.dataGridView3.Location = new System.Drawing.Point(0, 250);
             this.dataGridView3.Name = "dataGridView3";
             this.dataGridView3.ReadOnly = true;
-            this.dataGridView3.Size = new System.Drawing.Size(403, 160);
+            this.dataGridView3.Size = new System.Drawing.Size(403, 137);
             this.dataGridView3.TabIndex = 16;
             // 
             // fileNameDataGridViewTextBoxColumn
@@ -400,11 +401,25 @@
             this.radioButtonYa.UseVisualStyleBackColor = true;
             this.radioButtonYa.CheckedChanged += new System.EventHandler(this.radioButtonYa_CheckedChanged);
             // 
+            // useYandexCityCheckBox
+            // 
+            this.useYandexCityCheckBox.AutoSize = true;
+            this.useYandexCityCheckBox.Checked = true;
+            this.useYandexCityCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.useYandexCityCheckBox.Location = new System.Drawing.Point(12, 227);
+            this.useYandexCityCheckBox.Name = "useYandexCityCheckBox";
+            this.useYandexCityCheckBox.Size = new System.Drawing.Size(141, 17);
+            this.useYandexCityCheckBox.TabIndex = 26;
+            this.useYandexCityCheckBox.Text = "брать город из Yandex";
+            this.useYandexCityCheckBox.UseVisualStyleBackColor = true;
+            this.useYandexCityCheckBox.CheckedChanged += new System.EventHandler(this.useYandexCityCheckBox_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1433, 502);
+            this.Controls.Add(this.useYandexCityCheckBox);
             this.Controls.Add(this.radioButtonYa);
             this.Controls.Add(this.radioButtonOSM);
             this.Controls.Add(this.numericUpDown1);
@@ -473,6 +488,7 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn comleteDataGridViewCheckBoxColumn;
         private System.Windows.Forms.RadioButton radioButtonOSM;
         private System.Windows.Forms.RadioButton radioButtonYa;
+        private System.Windows.Forms.CheckBox useYandexCityCheckBox;
     }
 }
 

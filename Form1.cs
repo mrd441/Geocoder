@@ -84,6 +84,8 @@ namespace OSM_Geocoding
         public int curentProxyIndex;
         public bool useProxy;
         public string usingService;
+        string yandexCity;
+        bool useYandexCity;
         int reqestDelay;
         private static List<Task> workers = new List<Task>();
 
@@ -106,6 +108,7 @@ namespace OSM_Geocoding
             this.AllowDrop = true;
             this.DragEnter += new DragEventHandler(Form1_DragEnter);
             this.DragDrop += new DragEventHandler(Form1_DragDrop);
+            useYandexCity = useYandexCityCheckBox.Checked;
 
             //proxyLixt[0]
         }
@@ -185,7 +188,8 @@ namespace OSM_Geocoding
         async Task MainAsync(int fileIndex)
         {
             try
-            {                
+            {
+                yandexCity = "";
                 loging(0, "Чтение входного файла");
                 loadXML(listBox1.Items[fileIndex].ToString());
                 loging(0, "Чтение файла заершено");
@@ -196,6 +200,8 @@ namespace OSM_Geocoding
                 //int i = curentProxyIndex;
                 int j = 0;
                 int notWorkingProxies = 0;
+                if (addressList.Count>0)
+                    await reverseGeocodinYandex(j, true);
                 while (checkedAddresses < addressList.Count)
                 {
                     if (proxyLixt[curentProxyIndex].raiting > 0)
@@ -206,7 +212,7 @@ namespace OSM_Geocoding
                             {
                                 //Task aTask = Task.Run(() => reverseGeocoding(j, curentProxyIndex));
                                 Task aTask;
-                                aTask = usingService == "yandex"? Task.Run(() => reverseGeocodinYandex(j)) : Task.Run(() => reverseGeocoding(j, curentProxyIndex));
+                                aTask = usingService == "yandex"? Task.Run(() => reverseGeocodinYandex(j, false)) : Task.Run(() => reverseGeocoding(j, curentProxyIndex));
                                 
                                 workers.Add(aTask);
                                 await Task.Delay(10);
@@ -264,7 +270,7 @@ namespace OSM_Geocoding
             
         }
 
-        async Task reverseGeocodinYandex(int addressIndex)
+        async Task reverseGeocodinYandex(int addressIndex, bool CheckCity)
         {
             AddressListElement aAddressListElement = addressList[addressIndex];
             aAddressListElement.isChecking = true;
@@ -319,13 +325,23 @@ namespace OSM_Geocoding
                                     break;
                             }
                         }
+
+                        if (CheckCity)
+                        {
+                            yandexCity = hamlet;
+                            aAddressListElement.isChecking = false;
+                            addressList[addressIndex] = aAddressListElement;
+                            addressListElementBindingSource.ResetItem(addressIndex);
+                            return;
+                        }
+
                         aAddressListElement.city = hamlet;
                         aAddressListElement.road = road;
                         aAddressListElement.house_number = house_number;
                         aAddressListElement.Checked = true;
                         aAddressListElement.isChecking = false;
                         addressList[addressIndex] = aAddressListElement;
-                        addressListElementBindingSource.ResetItem(addressIndex);
+                        addressListElementBindingSource.ResetItem(addressIndex);                        
                         checkedAddresses++;
                     }
                 }
@@ -375,7 +391,8 @@ namespace OSM_Geocoding
                     client.DefaultRequestHeaders.Add("User-Agent", "C# console program");
                     client.Timeout = TimeSpan.FromMilliseconds(3000);
 
-                    //nominatim.openstreetmap.org/reverse?lat=42.095995&lon=47.595025&accept-language=ru&zoom=18&email=441-05@mail.ru&addressdetails=1format=xml
+                    //nominatim.openstreetmap.org/reverse?lat=42.095995&lon=47.595025&accept-language=ru&zoom=18&email=441-05@mail.ru&addressdetails=1format=xml nominatim.openstreetmap.org/reverse?accept-language=ru&zoom=18&format=xml&lat=44.948674&lon=45.854249
+
 
                     var uri = "/reverse?accept-language=ru&zoom=18&format=xml";
 
@@ -403,6 +420,10 @@ namespace OSM_Geocoding
                                 if (hamlet == "")
                                     aAddressListElement.city = city;
                                 else aAddressListElement.city = hamlet;
+
+                                if (useYandexCity & yandexCity != "")
+                                    aAddressListElement.city = yandexCity;
+
                                 aAddressListElement.road = road;
                                 aAddressListElement.house_number = house_number;
                                 aAddressListElement.Checked = true;
@@ -538,7 +559,7 @@ namespace OSM_Geocoding
                 for (int i = 2; i <= rowCount; i++)
                 {
                     bool outOfRange = i > rowCount2;
-                    if (arrData[i, 15] != null && arrData[i, 16] != null)
+                    if (arrData[i, 15] != null && arrData[i, 16] != null && arrData[i, 12] != null)
                     {
                         AddressListElement aAddressListElement = new AddressListElement();
                         aAddressListElement.row = i;
@@ -672,7 +693,7 @@ namespace OSM_Geocoding
                 xlSht.Name = shtName;
 
                 Excel.Range range;
-                range = xlSht.get_Range("S5", "T" + (addressList.Count + 4).ToString());
+                range = xlSht.get_Range("R5", "S" + (addressList.Count + 4).ToString());
                 range.NumberFormat = "@";
                 range.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignLeft;
 
@@ -683,7 +704,7 @@ namespace OSM_Geocoding
 
                 range.Value = arr;
 
-                xlSht.Columns["A:U"].AutoFit();
+                xlSht.Columns["A:T"].AutoFit();
 
                 xlWB.SaveCopyAs(newFullfileName);
                 xlWB.Close(false);
@@ -749,6 +770,11 @@ namespace OSM_Geocoding
         private void radioButtonOSM_CheckedChanged(object sender, EventArgs e)
         {
             usingService = "osm";
+        }
+
+        private void useYandexCityCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            useYandexCity = useYandexCityCheckBox.Checked;
         }
     }
 }

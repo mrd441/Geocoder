@@ -1,9 +1,3 @@
-#исключим всё exel файлы
-*.xls
-*.xlsx
-#кроме конкретного файла:
-!template.xlsx
-
 # User-specific files
 *.suo
 *.user

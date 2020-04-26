@@ -15,6 +15,7 @@ template.xlsx
 *.exe
 .vs/
 result/
+input/
 [Dd]ebug/
 [Rr]elease/
 x64/

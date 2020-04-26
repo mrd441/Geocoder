@@ -1,3 +1,11 @@
+#исключим всё exel файлы и файлы прокси листов
+proxyList*.txt
+*.xls
+*.xlsx
+#кроме конкретного файла:
+!template.xlsx
+
+template.xlsx
 # User-specific files
 *.suo
 *.user

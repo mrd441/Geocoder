@@ -616,8 +616,8 @@ namespace OSM_Geocoding
                         addressList.Add(aAddressListElement);
                     }
                 }
-                if (minVal == Int32.MaxValue) minVal = 0;
-                if (maxVal == 0) maxVal = 100;
+                if (minVal == Int32.MaxValue) minVal = 4;
+                if (maxVal == 0) maxVal = 35;
                 Random rnd = new Random();
                 for (int i = 2; i <= rowCount3; i++)
                 {

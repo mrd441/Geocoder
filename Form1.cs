@@ -540,14 +540,18 @@ namespace OSM_Geocoding
                 Excel.Workbook xlWB;               
                 Excel.Worksheet xlSht; 
                 Excel.Worksheet xlSht2;
+                Excel.Worksheet xlSht3;
                 xlWB = xlApp.Workbooks.Open(file);                                          
                 xlSht = (Excel.Worksheet)xlWB.Worksheets[1]; 
                 xlSht2 = (Excel.Worksheet)xlWB.Worksheets[2];
+                xlSht3 = (Excel.Worksheet)xlWB.Worksheets[3];
                 Excel.Range last = xlSht.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing);
                 Excel.Range last2 = xlSht2.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing);
+                Excel.Range last3 = xlSht3.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing);
                 var arrData = (object[,])xlSht.get_Range("A1", last).Value;
                 var arrData2 = (object[,])xlSht2.get_Range("A1", last2).Value;
-                
+                var arrData3 = (object[,])xlSht3.get_Range("A1", last3).Value;
+
                 xlWB.Close(false); 
                 xlApp.Quit(); 
 
@@ -555,10 +559,14 @@ namespace OSM_Geocoding
                 int colCount = arrData.GetUpperBound(1);
 
                 int rowCount2 = arrData2.GetUpperBound(0);
+                int rowCount3 = arrData3.GetUpperBound(0);
 
+                int errShift = 0;
+                int maxVal = 0;
+                int minVal = Int32.MaxValue;
                 for (int i = 2; i <= rowCount; i++)
                 {
-                    bool outOfRange = i > rowCount2;
+                    bool outOfRange = (i+ errShift) > rowCount2;
                     if (arrData[i, 15] != null && arrData[i, 16] != null && arrData[i, 12] != null)
                     {
                         AddressListElement aAddressListElement = new AddressListElement();
@@ -570,12 +578,67 @@ namespace OSM_Geocoding
                         aAddressListElement.J = getStringFromXML(arrData[i, 10]);
                         aAddressListElement.K = getStringFromXML(arrData[i, 11]);                        
                         aAddressListElement.L = getStringFromXML(arrData[i, 12]);                        
-                        aAddressListElement.fider_number = outOfRange ? "" : getStringFromXML(arrData2[i, 6]);
-                        aAddressListElement.L2 = outOfRange ? "" : getStringFromXML(arrData2[i, 12]);
-                        aAddressListElement.K2 = outOfRange ? "" : getStringFromXML(arrData2[i, 11]);
+                        aAddressListElement.fider_number = getStringFromXML(arrData[i, 3]);
+
+                        string f2Value = "0";
+                        string l2Value = "0";
+                        while (!outOfRange & f2Value == "0")
+                        {                            
+                            f2Value = getStringFromXML(arrData2[i + errShift, 6]);
+                            l2Value = getStringFromXML(arrData2[i + errShift, 12]);
+                            l2Value = l2Value.IndexOf(',') != -1 ? l2Value.Substring(0, l2Value.IndexOf(',')) : l2Value;
+                            if (f2Value == "0")
+                                errShift++;
+                            outOfRange = (i + errShift) > rowCount2;
+                                int intVal = 0;
+                                try
+                                {
+                                    intVal = Convert.ToInt32(l2Value);
+                                }
+                                catch (Exception Ex)
+                                {
+                                    intVal = 0;
+                                }
+                            if (intVal!=0)
+                            {
+                                if (maxVal < intVal)
+                                    maxVal = intVal;
+
+                                if (minVal > intVal)
+                                    minVal = intVal;
+                            }
+                        }
+                        aAddressListElement.L2 = l2Value;
+                        //aAddressListElement.K2 = outOfRange ? "" : getStringFromXML(arrData2[i, 11]);
                         addressList.Add(aAddressListElement);
                     }
                 }
+                if (minVal == Int32.MaxValue) minVal = 0;
+                if (maxVal == 0) maxVal = 100;
+                Random rnd = new Random();
+                for (int i = 2; i <= rowCount3; i++)
+                {
+                    if (arrData3[i, 15] != null && arrData3[i, 16] != null && arrData3[i, 12] != null)
+                    {
+
+                        AddressListElement aAddressListElement = new AddressListElement();
+                        aAddressListElement.row = i;
+                        //var ss = getStringFromXML(arrData[i, 15]);
+                        aAddressListElement.latid = getStringFromXML(arrData3[i, 15]).Replace(',', '.');
+                        aAddressListElement.longit = getStringFromXML(arrData3[i, 16]).Replace(',', '.');
+                        aAddressListElement.M = getStringFromXML(arrData3[i, 13]) == "" ? "АС" : getStringFromXML(arrData[i, 13]);
+                        aAddressListElement.J = getStringFromXML(arrData3[i, 10]);
+                        aAddressListElement.K = getStringFromXML(arrData3[i, 11]);
+                        if (aAddressListElement.K == "0") continue;
+                        aAddressListElement.L = getStringFromXML(arrData3[i, 12]);
+                        aAddressListElement.fider_number = getStringFromXML(arrData3[i, 3]);
+                                                
+                        aAddressListElement.L2 = rnd.Next(minVal, rnd.Next(minVal,maxVal)).ToString(); // с уклоном в меньшую сторону
+                        //aAddressListElement.K2 = outOfRange ? "" : getStringFromXML(arrData2[i, 11]);
+                        addressList.Add(aAddressListElement);
+                    }
+                }
+
                 resultInfoElement aResultInfoElement = new resultInfoElement();
                 aResultInfoElement.fileName = file.Split('\\').Last();
                 aResultInfoElement.addressCount = addressList.Count;
@@ -669,7 +732,7 @@ namespace OSM_Geocoding
                     
                     arr[i, 9] = aRow.J;
                     arr[i, 10] = aRow.K;
-                    arr[i, 11] = aRow.L2.IndexOf(',') != -1 ? aRow.L2.Substring(0, aRow.L2.IndexOf(',')) : "";
+                    arr[i, 11] = aRow.L2;
                     arr[i, 12] = aRow.M;
                     arr[i, 13] = "фасад-кирпич";
                     arr[i, 14] = aRow.L;

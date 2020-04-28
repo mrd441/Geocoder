@@ -567,6 +567,34 @@ namespace OSM_Geocoding
                 for (int i = 2; i <= rowCount; i++)
                 {
                     bool outOfRange = (i+ errShift) > rowCount2;
+                    string f2Value = "0";
+                    string l2Value = "0";
+                    while (!outOfRange & f2Value == "0")
+                    {
+                        f2Value = getStringFromXML(arrData2[i + errShift, 6]);
+                        l2Value = getStringFromXML(arrData2[i + errShift, 12]);
+                        l2Value = l2Value.IndexOf(',') != -1 ? l2Value.Substring(0, l2Value.IndexOf(',')) : l2Value;
+                        if (f2Value == "0")
+                            errShift++;
+                        outOfRange = (i + errShift) > rowCount2;
+                        int intVal = 0;
+                        try
+                        {
+                            intVal = Convert.ToInt32(l2Value);
+                        }
+                        catch (Exception Ex)
+                        {
+                            intVal = 0;
+                        }
+                        if (intVal != 0)
+                        {
+                            if (maxVal < intVal)
+                                maxVal = intVal;
+
+                            if (minVal > intVal)
+                                minVal = intVal;
+                        }
+                    }
                     if (arrData[i, 15] != null && arrData[i, 16] != null && arrData[i, 12] != null)
                     {
                         AddressListElement aAddressListElement = new AddressListElement();
@@ -576,38 +604,13 @@ namespace OSM_Geocoding
                         aAddressListElement.longit = getStringFromXML(arrData[i, 16]).Replace(',', '.');                        
                         aAddressListElement.M = getStringFromXML(arrData[i, 13]) == "" ? "АС" : getStringFromXML(arrData[i, 13]);
                         aAddressListElement.J = getStringFromXML(arrData[i, 10]);
-                        aAddressListElement.K = getStringFromXML(arrData[i, 11]);                        
+                        aAddressListElement.K = getStringFromXML(arrData[i, 11]);
+                        if (aAddressListElement.K == "0" | aAddressListElement.K == "") continue;
                         aAddressListElement.L = getStringFromXML(arrData[i, 12]);                        
                         aAddressListElement.fider_number = getStringFromXML(arrData[i, 3]);
 
-                        string f2Value = "0";
-                        string l2Value = "0";
-                        while (!outOfRange & f2Value == "0")
-                        {                            
-                            f2Value = getStringFromXML(arrData2[i + errShift, 6]);
-                            l2Value = getStringFromXML(arrData2[i + errShift, 12]);
-                            l2Value = l2Value.IndexOf(',') != -1 ? l2Value.Substring(0, l2Value.IndexOf(',')) : l2Value;
-                            if (f2Value == "0")
-                                errShift++;
-                            outOfRange = (i + errShift) > rowCount2;
-                                int intVal = 0;
-                                try
-                                {
-                                    intVal = Convert.ToInt32(l2Value);
-                                }
-                                catch (Exception Ex)
-                                {
-                                    intVal = 0;
-                                }
-                            if (intVal!=0)
-                            {
-                                if (maxVal < intVal)
-                                    maxVal = intVal;
-
-                                if (minVal > intVal)
-                                    minVal = intVal;
-                            }
-                        }
+                        
+                        if (aAddressListElement.K == "0") continue;
                         aAddressListElement.L2 = l2Value;
                         //aAddressListElement.K2 = outOfRange ? "" : getStringFromXML(arrData2[i, 11]);
                         addressList.Add(aAddressListElement);
@@ -629,7 +632,7 @@ namespace OSM_Geocoding
                         aAddressListElement.M = getStringFromXML(arrData3[i, 13]) == "" ? "АС" : getStringFromXML(arrData[i, 13]);
                         aAddressListElement.J = getStringFromXML(arrData3[i, 10]);
                         aAddressListElement.K = getStringFromXML(arrData3[i, 11]);
-                        if (aAddressListElement.K == "0") continue;
+                        if (aAddressListElement.K == "0" | aAddressListElement.K == "") continue;
                         aAddressListElement.L = getStringFromXML(arrData3[i, 12]);
                         aAddressListElement.fider_number = getStringFromXML(arrData3[i, 3]);
                                                 

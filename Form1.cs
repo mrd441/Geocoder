@@ -87,6 +87,9 @@ namespace OSM_Geocoding
         string yandexCity;
         bool useYandexCity;
         int reqestDelay;
+        int maxVal;
+        int minVal;
+        Dictionary<string, int> validCity;
         private static List<Task> workers = new List<Task>();
 
         public Form1()
@@ -189,6 +192,9 @@ namespace OSM_Geocoding
         {
             try
             {
+                maxVal = 0;
+                minVal = Int32.MaxValue;
+                validCity = new Dictionary<string, int>();
                 yandexCity = "";
                 loging(0, "Чтение входного файла");
                 loadXML(listBox1.Items[fileIndex].ToString());
@@ -336,6 +342,15 @@ namespace OSM_Geocoding
                         }
 
                         aAddressListElement.city = hamlet;
+
+                        if (aAddressListElement.city != "")
+                        {
+                            if (validCity.ContainsKey(aAddressListElement.city))
+                                validCity[aAddressListElement.city] = validCity[aAddressListElement.city] + 1;
+                            else
+                                validCity.Add(aAddressListElement.city, 1);
+                        }
+
                         aAddressListElement.road = road;
                         aAddressListElement.house_number = house_number;
                         aAddressListElement.Checked = true;
@@ -423,6 +438,14 @@ namespace OSM_Geocoding
 
                                 if (useYandexCity & yandexCity != "")
                                     aAddressListElement.city = yandexCity;
+
+                                if (aAddressListElement.city != "")
+                                {
+                                    if (validCity.ContainsKey(aAddressListElement.city))
+                                        validCity[aAddressListElement.city] = validCity[aAddressListElement.city] + 1;
+                                    else
+                                        validCity.Add(aAddressListElement.city, 1);
+                                }
 
                                 aAddressListElement.road = road;
                                 aAddressListElement.house_number = house_number;
@@ -562,8 +585,8 @@ namespace OSM_Geocoding
                 int rowCount3 = arrData3.GetUpperBound(0);
 
                 int errShift = 0;
-                int maxVal = 0;
-                int minVal = Int32.MaxValue;
+                //int maxVal = 0;
+                //int minVal = Int32.MaxValue;
                 for (int i = 2; i <= rowCount; i++)
                 {
                     bool outOfRange = (i+ errShift) > rowCount2;
@@ -617,7 +640,8 @@ namespace OSM_Geocoding
                     }
                 }
                 if (minVal == Int32.MaxValue) minVal = 4;
-                if (maxVal == 0) maxVal = 35;
+                if (maxVal == 0) maxVal = 34; maxVal++;
+
                 Random rnd = new Random();
                 for (int i = 2; i <= rowCount3; i++)
                 {
@@ -629,7 +653,7 @@ namespace OSM_Geocoding
                         //var ss = getStringFromXML(arrData[i, 15]);
                         aAddressListElement.latid = getStringFromXML(arrData3[i, 15]).Replace(',', '.');
                         aAddressListElement.longit = getStringFromXML(arrData3[i, 16]).Replace(',', '.');
-                        aAddressListElement.M = getStringFromXML(arrData3[i, 13]) == "" ? "АС" : getStringFromXML(arrData[i, 13]);
+                        aAddressListElement.M = getStringFromXML(arrData3[i, 13]) == "" ? "АС" : getStringFromXML(arrData3[i, 13]);
                         aAddressListElement.J = getStringFromXML(arrData3[i, 10]);
                         aAddressListElement.K = getStringFromXML(arrData3[i, 11]);
                         if (aAddressListElement.K == "0" | aAddressListElement.K == "") continue;
@@ -683,6 +707,7 @@ namespace OSM_Geocoding
             
             try
             {
+                Random rnd = new Random();
                 int resulFileNumber = resultList.Count-1;
                 string fileName = resultList.Last().fileName;
                 string fullFileName = listBox1.Items[resulFileNumber].ToString();
@@ -697,6 +722,15 @@ namespace OSM_Geocoding
                 {
                     throw new Exception("не найден шаблон выходного файла");
                 }
+
+                string goodCity = "";
+                int cityCount = 0;
+                foreach (string key in validCity.Keys)
+                    if (validCity[key] > cityCount)
+                    {
+                        goodCity = key;
+                        cityCount = validCity[key];
+                    }                        
 
                 string tmp = newFileName.Split('.').First().Replace("_", "/");
 
@@ -718,8 +752,10 @@ namespace OSM_Geocoding
                     arr[i, 3] = row4;
                     arr[i, 4] = row5;
                     arr[i, 5] = aRow.fider_number;
-                    arr[i, 6] = aRow.city == "" ? "Нет данных в РК" : aRow.city;
                     
+                    //arr[i, 6] = aRow.city == "" ? "Нет данных в РК" : aRow.city;
+                    arr[i, 6] = goodCity == "" ? "Нет данных в РК" : goodCity;
+
                     string road = aRow.road == "" ? "Нет данных в РК" : aRow.road;
                     string houseNumber = aRow.house_number == "" ? "Нет данных в РК" : aRow.house_number;
                     
@@ -735,7 +771,9 @@ namespace OSM_Geocoding
                     
                     arr[i, 9] = aRow.J;
                     arr[i, 10] = aRow.K;
-                    arr[i, 11] = aRow.L2;
+
+                    arr[i, 11] = aRow.L2 == "" ? rnd.Next(minVal, rnd.Next(minVal, maxVal)).ToString() : aRow.L2;
+                    //arr[i, 11] = aRow.L2;
                     arr[i, 12] = aRow.M;
                     arr[i, 13] = "фасад-кирпич";
                     arr[i, 14] = aRow.L;
@@ -841,6 +879,21 @@ namespace OSM_Geocoding
         private void useYandexCityCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             useYandexCity = useYandexCityCheckBox.Checked;
+        }
+
+        private void dataGridView2_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+
+        }
+
+        private void dataGridView3_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+
         }
     }
 }

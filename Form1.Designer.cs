@@ -102,6 +102,7 @@
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.Size = new System.Drawing.Size(314, 387);
             this.dataGridView1.TabIndex = 3;
+            this.dataGridView1.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView1_DataError);
             // 
             // addressDataGridViewTextBoxColumn
             // 
@@ -152,6 +153,7 @@
             this.dataGridView2.ReadOnly = true;
             this.dataGridView2.Size = new System.Drawing.Size(716, 387);
             this.dataGridView2.TabIndex = 6;
+            this.dataGridView2.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView2_DataError);
             // 
             // rowDataGridViewTextBoxColumn
             // 
@@ -270,6 +272,7 @@
             this.dataGridView3.ReadOnly = true;
             this.dataGridView3.Size = new System.Drawing.Size(403, 137);
             this.dataGridView3.TabIndex = 16;
+            this.dataGridView3.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView3_DataError);
             // 
             // fileNameDataGridViewTextBoxColumn
             // 

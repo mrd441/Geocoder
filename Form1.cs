@@ -254,7 +254,7 @@ namespace OSM_Geocoding
                             throw new Exception("Процесс завершился ошибкой. Не получено ответа ни от одного прокси");
 
                         }
-                        if (curentProxyIndex > proxyLixt.Count)
+                        if (curentProxyIndex >= proxyLixt.Count)
                         {
                             curentProxyIndex = 0;
                             notWorkingProxies = 0;
